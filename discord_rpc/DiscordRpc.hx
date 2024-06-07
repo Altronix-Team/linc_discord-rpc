@@ -13,8 +13,9 @@ class DiscordRpc
 {
     /**
      *  Called once Discord has connected and is ready to start.
+     *  DiscordUser contains the userID, username, and avatar of the user.
      */
-    public static var onReady : Void->Void;
+    public static var onReady : DiscordUser->Void;
 
     /**
      *  Called when discord has disconnected the program.
@@ -42,9 +43,9 @@ class DiscordRpc
 
     /**
      *  Called when the user has recieved a join request.
-     *  JoinRequest contains the userID, username, and avatar of the user.
+     *  DiscordUser contains the userID, username, and avatar of the user.
      */
-    public static var onRequest : JoinRequest->Void;
+    public static var onRequest : DiscordUser->Void;
 
     /**
      *  Attempts to connect to discord and initialize itself.
@@ -115,7 +116,7 @@ class DiscordRpc
 private extern class DiscordRpcExterns
 {
     @:native('linc::discord_rpc::init')
-    private static function _init(_clientID : String, _steamAppID : String, _onReady : VoidCallback, _onDisconnected : ErrorCallback, _onError : ErrorCallback, _onJoin : SecretCallback, _onSpectate : SecretCallback, _onRequest : RequestCallback) : Void;
+    private static function _init(_clientID : String, _steamAppID : String, _onReady : RequestCallback, _onDisconnected : ErrorCallback, _onError : ErrorCallback, _onJoin : SecretCallback, _onSpectate : SecretCallback, _onRequest : RequestCallback) : Void;
     static inline function init(_clientID : String, ?_steamAppID : String) : Void
     {
         _init(_clientID, _steamAppID,
@@ -147,8 +148,10 @@ private extern class DiscordRpcExterns
     @:native('linc::discord_rpc::shutdown')
     static function shutdown() : Void;
 
-    private static inline function _onReady() : Void
-        if (DiscordRpc.onReady != null) DiscordRpc.onReady();
+    private static inline function _onReady(_data : RawConstPointer<DiscordUser>) : Void {
+        var star : cpp.Star<DiscordUser> = cast _data;
+        if (DiscordRpc.onReady != null) DiscordRpc.onReady(star);
+    }
     private static inline function _onDisconnected(_errorCode : Int, _message : ConstCharStar) : Void
         if (DiscordRpc.onDisconnected != null) DiscordRpc.onDisconnected(_errorCode, _message);
     private static inline function _onError(_errorCode : Int, _message : ConstCharStar) : Void
@@ -157,8 +160,8 @@ private extern class DiscordRpcExterns
         if (DiscordRpc.onJoin != null) DiscordRpc.onJoin(_secret);
     private static inline function _onSpectate(_secret : ConstCharStar) : Void
         if (DiscordRpc.onSpectate != null) DiscordRpc.onSpectate(_secret);
-    private static inline function _onRequest(_data : RawConstPointer<JoinRequest>) : Void {
-        var star : cpp.Star<JoinRequest> = cast _data;
+    private static inline function _onRequest(_data : RawConstPointer<DiscordUser>) : Void {
+        var star : cpp.Star<DiscordUser> = cast _data;
         if (DiscordRpc.onRequest != null) DiscordRpc.onRequest(star);
     }
 }
@@ -166,10 +169,10 @@ private extern class DiscordRpcExterns
 // TYPEDEFS AND STUFF
 
 @:include('linc_discord_rpc.h')
-@:native('DiscordJoinRequest')
+@:native('DiscordUser')
 @:structAccess
 @:unreflective
-extern class JoinRequest
+extern class DiscordUser
 {
     public var userId : String;
     public var username : String;
@@ -180,17 +183,17 @@ extern class JoinRequest
 typedef VoidCallback    = Callable<Void->Void>;
 typedef ErrorCallback   = Callable<Int->ConstCharStar->Void>;
 typedef SecretCallback  = Callable<ConstCharStar->Void>;
-typedef RequestCallback = Callable<RawConstPointer<JoinRequest>->Void>;
+typedef RequestCallback = Callable<RawConstPointer<DiscordUser>->Void>;
 
 typedef DiscordStartOptions = {
     var clientID : String;
     @:optional var steamAppID : String;
-    @:optional var onReady        : Void->Void;
+    @:optional var onReady        : DiscordUser->Void;
     @:optional var onDisconnected : Int->String->Void;
     @:optional var onError        : Int->String->Void;
     @:optional var onJoin         : String->Void;
     @:optional var onSpectate     : String->Void;
-    @:optional var onRequest      : JoinRequest->Void;
+    @:optional var onRequest      : DiscordUser->Void;
 }
 
 typedef DiscordPresenceOptions = {

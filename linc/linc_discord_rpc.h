@@ -4,19 +4,19 @@
 #endif
 
 #include <hxcpp.h>
-#include "../lib/discord-rpc/include/discord-rpc.h"
+#include "../lib/discord-rpc/include/discord_rpc.h"
 
 namespace linc
 {
     namespace discord_rpc
     {
         extern void init(const char* _clientID, const char* _steamAppID,
-            void (*_onReady)(),
+            void (*_onReady)(const DiscordUser* request),
             void (*_onDisconnected)(int errorCode, const char* message),
             void (*_onError)(int errorCode, const char* message),
             void (*_onJoin)(const char* joinSecret),
             void (*_onSpectate)(const char* spectateSecret),
-            void (*_onRequest)(const DiscordJoinRequest* request));
+            void (*_onRequest)(const DiscordUser* request));
         extern void process();
         extern void update_presence(
             const char* _state, const char* _details,

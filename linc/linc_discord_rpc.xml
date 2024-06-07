@@ -14,7 +14,7 @@
         <compilerflag value = "-I${DISCORD-RPC}/include/" />
         <compilerflag value = "-I${RAPIDJSON}/include/" />
 
-        <file name = "${DISCORD-RPC}/src/discord-rpc.cpp" />
+        <file name = "${DISCORD-RPC}/src/discord_rpc.cpp" />
         <file name = "${DISCORD-RPC}/src/rpc_connection.cpp" />
         <file name = "${DISCORD-RPC}/src/serialization.cpp" />
 
